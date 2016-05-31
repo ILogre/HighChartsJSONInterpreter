@@ -13,7 +13,7 @@ public class Scenario {
 
     public static void main(String [] args){
         try {
-            HighChartsJSONExtractor.extract(new File(PATH_TO_ROOT_FOLDER+"line-basic_index.htm"));
+            HighChartsJSONExtractor.extract(new File(PATH_TO_ROOT_FOLDER+"interaction_bar_pie_stacked.htm"));
         } catch (FileIsNotAccessible fileIsNotAccessible) {
             fileIsNotAccessible.printStackTrace();
         } catch (IOException e) {

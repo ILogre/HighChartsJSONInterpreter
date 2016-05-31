@@ -8,6 +8,6 @@ import org.json.JSONObject;
 public class HighChartsInterpretor {
 
     public static void interprete(JSONObject code){
-
+        code.getJSONObject("chart");
     }
 }

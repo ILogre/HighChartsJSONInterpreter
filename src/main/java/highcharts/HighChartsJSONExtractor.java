@@ -2,13 +2,16 @@ package highcharts;
 
 
 import exceptions.FileIsNotAccessible;
-import org.json.JSONObject;
+import highcharts.guidelines.HCDashboard;
+import highcharts.guidelines.HCWidget;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
+
+import static highcharts.guidelines.HCDashboard.BEGIN_DASHBOARD;
+import static highcharts.guidelines.HCDashboard.END_DASHBOARD;
+import static highcharts.guidelines.HCWidget.END_DETECT_WIDGET;
 
 
 /**
@@ -17,10 +20,8 @@ import java.util.Map;
 public class HighChartsJSONExtractor {
 
 
-    public static final String BEGIN_DETECT_VISU = "$('#";
-    public static final String END_DETECT_VISU = "').highcharts(";
 
-    public static Map<String,JSONObject> extract(File file) throws FileIsNotAccessible, IOException {
+    public static HCDashboard extract(File file) throws FileIsNotAccessible, IOException {
         //check the existence of the file
         if (!file.exists() || !file.canRead())
             throw new FileIsNotAccessible("Input file does not exist or is not readable."+"\n"+file.getAbsolutePath());
@@ -30,10 +31,14 @@ public class HighChartsJSONExtractor {
         Files.lines(file.toPath()).map(s ->  removeComments(s)).forEach(l -> sb.append(l));
         String dashboard = sb.toString();
 
-        Map result = new HashMap<>();
+        HCDashboard result = new HCDashboard();
 
+        // we split the widgets
         String[] visus = dashboard.split("var (\\w)* = \\$\\(\\'\\#");
-        visus[visus.length-1] = visus[visus.length-1].substring(0, visus[visus.length-1].indexOf("</script>"));
+        // we collect the first part containing variables and functions
+        visus[0].substring(visus[0].indexOf(BEGIN_DASHBOARD));
+        // we extract the syntactic html from the last widget
+        visus[visus.length-1] = visus[visus.length-1].substring(0, visus[visus.length-1].indexOf(END_DASHBOARD));
 
         for (int i =1; i<visus.length;i++) {
             String content = visus[i].trim();
@@ -42,8 +47,10 @@ public class HighChartsJSONExtractor {
             String visuName = content.substring(0, content.indexOf("'"));
 
             // we delete tokens until the beginning of the JSON object representing the visualization
-            String JSONcontent = content.substring(content.indexOf(END_DETECT_VISU) + END_DETECT_VISU.length());
-            result.put(visuName, new JSONObject(JSONcontent));
+            String JSONcontent = content.substring(content.indexOf(END_DETECT_WIDGET) + END_DETECT_WIDGET.length());
+
+            HCWidget current = new HCWidget(visuName, JSONcontent);
+            result.addWidget(current);
         }
 
         return result;

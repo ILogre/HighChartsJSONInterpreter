@@ -1,5 +1,6 @@
 package PivotModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,6 +12,11 @@ public class View extends NamedElement{
     public View(String name, List<Visualization> visualizations) {
         super(name);
         this.visualizations = visualizations;
+    }
+
+    public View(String name) {
+        super(name);
+        this.visualizations = new ArrayList<>();
     }
 
     public List<Visualization> getVisualizations() {
